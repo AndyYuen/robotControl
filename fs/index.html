@@ -1,0 +1,134 @@
+<html>
+<head>
+  <title>Remote Robot control</title>
+</head>
+
+<style>
+body {background-color: white}
+h1 {color:blue}
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
+
+<body>
+
+<div style="text-align:center">
+
+<h1>  Remote Robot Control  </h1>
+
+  <br/>
+
+
+  
+  <table style="width:100%"><tr><td>
+  <img hspace="30" style="padding-left: 20px">
+  <fieldset>
+    <legend>Your name (For identifying movement recording):</legend>
+    <input type="text" id="name" />
+    <button class="button" onclick="robotCommand('name '+ document.getElementById('name').value + ';')">Save</button>
+    <br />
+  </fieldset></td><td>
+    <fieldset>
+      <legend>Motor Speed (Percent Top Speed):</legend>
+      <input style="width:40%" type="range" min="1" max="100" value="50" class="slider" id="speed" list="speedmarks" onchange="buddyRobotCommand('speed', 'speedValue', 'speed '+ this.value.toString() + ';')">
+      <datalist id="speedmarks">
+        <option value="0">
+        <option value="20">
+        <option value="40">
+        <option value="60">
+        <option value="80">
+        <option value="100">
+      </datalist>
+      <br />
+      <input type="textbox" id="speedValue" value="50" readonly>
+      <br />
+     </fieldset></td></tr>
+  </table>
+
+  <br />
+      <fieldset>
+          <legend>Robot Movement:</legend>
+        <button class="button"  onclick="robotCommand('spinLeft;')">SPINLEFT</button>
+        <img hspace="20" style="padding-left: 10px">
+        <button class="button" onclick="robotCommand('forward;')">FORWARD</button>
+        <img hspace="20" style="padding-left: 10px">
+        <button class="button"  onclick="robotCommand('spinRight;')">SPINRIGHT</button>
+        <br><br><br><br>
+        <img hspace="10" style="padding-left: 5px">
+        <button class="button"  onclick="robotCommand('left;')">LEFT</button>
+        <img hspace="20" style="padding-left: 10px">
+        <button class="button"  onclick="robotCommand('stop;')">STOP</button>
+        <img hspace="20" style="padding-left: 10px">
+        <button class="button"  onclick="robotCommand('right;')">RIGHT</button>
+        <img hspace="10" style="padding-left: 5px">
+        <br><br><br><br>
+        <button class="button"  onclick="robotCommand('backward;')">BACKWARD</button>
+      </fieldset>
+
+
+
+
+<script>
+  var ws;
+
+  function robotCommand(command) {
+    console.log('event triggered:' + command);
+    // send command
+    ws.send(JSON.stringify({
+      method: "Robot.Cmd",
+        args: {
+          cmd: command
+        }
+    }));
+  }
+
+  function buddyRobotCommand(rangeId, textId, command) {
+    document.getElementById(textId).value = document.getElementById(rangeId).value;
+    robotCommand(command);
+  }
+
+  function setupWS() {
+        var wsUri = 'ws://' + window.location.hostname + '/rpc';
+
+        if ("WebSocket" in window) {
+          console.log("WebSocket is supported by your Browser! Url:" + wsUri);
+
+          // open a web socket
+          ws = new WebSocket(wsUri);
+
+          ws.onopen = function() {
+              console.log("WebSocket connection opened...");
+          };
+
+          ws.onmessage = function (evt) { 
+              var received_msg = evt.data;
+              console.log(received_msg);
+          };
+
+          ws.onclose = function() { 
+
+              // websocket is closed.
+              console.log("WebSocket connection is closed..."); 
+          };
+        } else {
+
+          // The browser doesn't support WebSocket
+          alert("WebSocket NOT supported by your Browser!");
+        }
+      }
+      setupWS();
+        
+</script>
+
+</body>
+</html>
